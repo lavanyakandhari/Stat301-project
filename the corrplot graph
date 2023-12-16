@@ -1,0 +1,146 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPrM7g+mUdj10f2t1OaUkfE",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "ir",
+      "display_name": "R"
+    },
+    "language_info": {
+      "name": "R"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/lavanyakandhari/Stat301-project/blob/main/the%20corrplot%20graph\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 145
+        },
+        "id": "7a9tnrZD89iM",
+        "outputId": "0ff7f922-7d29-4751-ce3d-af0ca8a42385"
+      },
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "ERROR",
+          "evalue": "ignored",
+          "traceback": [
+            "Error in library(corrplot): there is no package called ‘corrplot’\nTraceback:\n",
+            "1. library(corrplot)"
+          ]
+        }
+      ],
+      "source": [
+        "library(corrplot)\n",
+        "\n",
+        "\n",
+        "library(tidyverse)\n",
+        "library(readr)\n",
+        "\n",
+        "library(gridExtra)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "install.packages(\"gridExtra\")\n",
+        "library(gridExtra)\n",
+        "heart <- read.csv(\"https://raw.githubusercontent.com/lavanyakandhari/Stat301-project/main/heart.csv\")\n",
+        "head(heart)\n",
+        "heart_data <- (unique(heart))\n",
+        "cat(\"dimentions of our dataset are:\", dim(heart_data))\n",
+        "colnames(heart_data)[3] = \"chestpain\"\n",
+        "colnames(heart_data)[8] = \"max_hrate\"\n",
+        "colnames(heart_data)[10] = \"st_depression_ind\"\n",
+        "colnames(heart_data)[12] = \"num_vessels\"\n",
+        "\n",
+        "#Convert integer columns representing categorical data to factors\n",
+        "heart_data$sex <- as.factor(heart_data$sex)\n",
+        "heart_data$cp <- as.factor(heart_data$chestpain)\n",
+        "heart_data$fbs <- as.factor(heart_data$fbs)\n",
+        "heart_data$restecg <- as.factor(heart_data$restecg)\n",
+        "heart_data$exang <- as.factor(heart_data$exang)\n",
+        "heart_data$slope <- as.factor(heart_data$slope)\n",
+        "heart_data$ca <- as.factor(heart_data$num_vessels)\n",
+        "heart_data$thal <- as.factor(heart_data$thal)\n",
+        "heart_data$target <- ifelse(heart_data$target==0,1,0) |> as.factor()\n",
+        "\n",
+        "#remove rows that contains NA.\n",
+        "data_tidy <- heart_data %>%\n",
+        "  drop_na()\n",
+        "head(data_tidy)\n",
+        "#relation between age, cholesterol levels\n",
+        "age_vs_chol <- data_tidy %>%\n",
+        "  ggplot(aes(x = age, y = chol , col = target )) +\n",
+        "  geom_point() +\n",
+        "  ggtitle(\"Age vs Serum Cholesterol\") +\n",
+        "  labs(x = \"Age\", y = \"Serum Cholesterol \\\n",
+        "    (mg/dl)\", col = \"Heart Disease Presence\") +\n",
+        "  theme(text = element_text(size = 7)) +\n",
+        "  scale_color_manual(labels = c(\"No\", \"Yes\"),\n",
+        "                     values = c(\"orange2\", \"steelblue2\"))\n",
+        "#relation between age, resting blood pressure\n",
+        "age_vs_trestbps <- data_tidy %>%\n",
+        "  ggplot(aes(x = age, y = trestbps , col = target )) +\n",
+        "  geom_point() +\n",
+        "  ggtitle(\"Age vs Resting blood pressure\") +\n",
+        "  labs(x = \"Age\", y = \"Resting blood \\\n",
+        "    pressure (mm Hg)\", col = \"Heart Disease Presence\") +\n",
+        "  theme(text = element_text(size = 7)) +\n",
+        "  scale_color_manual(labels = c(\"No\", \"Yes\"),\n",
+        "                     values = c(\"orange2\", \"steelblue2\"))\n",
+        "#relation between cholesterol levels, resting blood pressure\n",
+        "chol_vs_trestbps <- data_tidy %>%\n",
+        "  ggplot(aes(x = chol, y = trestbps , col = target )) +\n",
+        "  geom_point() +\n",
+        "  ggtitle(\"Cholesterol Levels vs Resting Blood Pressure \") +\n",
+        "  labs(x = \"Cholesterol levels\", y = \"Resting blood \\\n",
+        "    pressure (in mm Hg)\", col = \"Heart Disease Presence\") +\n",
+        "  theme(text = element_text(size = 7)) +\n",
+        "  scale_color_manual(labels = c(\"No\", \"Yes\"),\n",
+        "                     values = c(\"orange2\", \"steelblue2\"))\n",
+        "\n",
+        "#relation between max Heart rate vs age coloured by presence of disease, shaped by sex\n",
+        "hr_vs_age <- ggplot(heart_data, aes(x = age,\n",
+        "                                    y = max_hrate, col=target)) +\n",
+        "  geom_point(aes(shape = sex, size=st_depression_ind)) +\n",
+        "  labs(x = \"Age\", y = \"Maximum heart rate achieved\",\n",
+        "       col = \"Heart Disease Presence\")+\n",
+        "  ggtitle(\"Scatterplot of max Heart rate vs age coloured by\n",
+        "  presence of disease, shaped by sex \") +\n",
+        "  theme(text = element_text(size = 7)) +\n",
+        "  scale_color_manual(labels = c(\"No\", \"Yes\"),\n",
+        "                     values = c(\"orange2\", \"steelblue2\"))\n",
+        "\n",
+        "#combine the graphs\n",
+        "options(repr.plot.width = 13, repr.plot.height = 6.5)\n",
+        "combined_plot<-grid.arrange(age_vs_chol, age_vs_trestbps, chol_vs_trestbps,hr_vs_age, ncol = 2)\n",
+        "combined_plot\n",
+        "heart_data\n",
+        "numeric_columns <- sapply(data_tidy, is.numeric)\n",
+        "\n",
+        "correlation_matrix <- cor(data_tidy[, numeric_columns])\n",
+        "\n",
+        "# Create correlation heatmap\n",
+        "corrplot(correlation_matrix, method = \"color\", type = \"upper\", order = \"hclust\", tl.col = \"black\", tl.srt = 45)\n"
+      ]
+    }
+  ]
+}
